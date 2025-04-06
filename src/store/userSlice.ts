@@ -13,7 +13,6 @@ const initialState: UserState = {
   limit: -1,
   picture: "",
 };
-
 export const fetchUser = createAppAsyncThunk("user/fetch", async () => {
   return await getUser();
 });
