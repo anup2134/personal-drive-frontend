@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { createUser } from "@/apis/createUser";
+import { createUser } from "@/apis/userApis";
 import { useEffect, useState } from "react";
 import {
   HoverCard,
@@ -13,7 +12,9 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import axios from "axios";
-// import { useNavigate } from "react-router-dom";
+import EmailPassword from "@/components/EmailPassword";
+import FormButton from "@/components/FormButton";
+import { Link } from "react-router-dom";
 
 export default function SignUp() {
   const [fname, setFname] = useState("");
@@ -24,13 +25,11 @@ export default function SignUp() {
   const [message, setMessage] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
-  // const navigate = useNavigate();
-  // const handleMouseIn = () => {};
 
   const handleSignUp = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const { data } = await axios.post(
+        await axios.post(
           "http://127.0.0.1:8000/api/v1/user/google/auth/",
           { access_token: tokenResponse.access_token },
           {
@@ -40,7 +39,6 @@ export default function SignUp() {
             },
           }
         );
-        console.log(data);
       } catch (err) {
         console.log(err);
       }
@@ -50,7 +48,6 @@ export default function SignUp() {
   const handleSubmit = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    // const a = performance.now();
     e.preventDefault();
     setLoading(true);
     setDisable(true);
@@ -67,9 +64,6 @@ export default function SignUp() {
         setDisable(false);
         setLoading(false);
       });
-
-    // const b = performance.now();
-    // console.log(b - a);
   };
 
   useEffect(() => {
@@ -139,44 +133,21 @@ export default function SignUp() {
             value={lname}
           />
         </div>
-        <div>
-          <Label>Email</Label>
-          <Input
-            type="email"
-            autoComplete="username"
-            placeholder="Email"
-            className="w-80"
-            onChange={(e) => {
-              setEmail(e.target.value.trim());
-            }}
-            value={email}
-          />
-        </div>
-        <div>
-          <Label>Password</Label>
-          <Input
-            type="password"
-            placeholder="Password"
-            onChange={(e) => {
-              setPassword(e.target.value.trim());
-            }}
-            autoComplete="current-password"
-            value={password}
-          />
-        </div>
+
+        <EmailPassword
+          password={password}
+          email={email}
+          setEmail={setEmail}
+          setPassword={setPassword}
+        />
         <HoverCard>
           <HoverCardTrigger>
-            <Button
-              className="py-5 mt-2 w-full hover:cursor-pointer"
+            <FormButton
+              name="Create Account"
               disabled={disabled}
-              onClick={handleSubmit}
-            >
-              {loading ? (
-                <div className="w-5 h-5 rounded-full border-l-2 border-r-2 border-t-2 border-black animate-spin"></div>
-              ) : (
-                "Create Account"
-              )}
-            </Button>
+              handleSubmit={handleSubmit}
+              loading={loading}
+            />
           </HoverCardTrigger>
           {message.length > 0 && (
             <HoverCardContent className="w-full">
@@ -207,6 +178,13 @@ export default function SignUp() {
         <p>Sign up with Google</p>
       </button>
       <Toaster />
+      <div>
+        Already have an account?{" "}
+        <Link to="/login" className="font-bold">
+          Log in{" "}
+        </Link>
+        instead
+      </div>
     </div>
   );
 }

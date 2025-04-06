@@ -75,6 +75,7 @@ export default function VerifyEmail() {
         </div>
       )}
       {expired && <div>Link expired</div>}
+      {!success && !loading && <div>Internal Server Error</div>}
     </div>
   );
 }
