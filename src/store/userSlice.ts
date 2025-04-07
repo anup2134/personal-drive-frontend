@@ -13,6 +13,7 @@ const initialState: UserState = {
   limit: -1,
   picture: "",
 };
+
 export const fetchUser = createAppAsyncThunk("user/fetch", async () => {
   return await getUser();
 });
@@ -82,6 +83,7 @@ export const selectLname = (state: RootState) => state.userReducer.l_name;
 export const selectEmail = (state: RootState) => state.userReducer.email;
 export const selectId = (state: RootState) => state.userReducer.id;
 export const selectPicture = (state: RootState) => state.userReducer.picture;
+export const selectLimit = (state: RootState) => state.userReducer.limit;
 
 export const { userLogout } = userSlice.actions;
 
