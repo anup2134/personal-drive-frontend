@@ -11,10 +11,13 @@ import GoogleSVG from "@/assets/google.svg";
 import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import axios from "axios";
 import EmailPassword from "@/components/EmailPassword";
 import FormButton from "@/components/FormButton";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import { signupGoogleUser, selectStatus } from "@/store/userSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function SignUp() {
   const [fname, setFname] = useState("");
@@ -25,23 +28,17 @@ export default function SignUp() {
   const [message, setMessage] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
+  const dispatch = useAppDispatch();
+  const status = useAppSelector(selectStatus);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (status === "success") navigate("/");
+    else if (status === "something went wrong") toast(status);
+  }, [status]);
 
   const handleSignUp = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      try {
-        await axios.post(
-          "http://127.0.0.1:8000/api/v1/user/google/auth/",
-          { access_token: tokenResponse.access_token },
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      } catch (err) {
-        console.log(err);
-      }
+      dispatch(signupGoogleUser(tokenResponse.access_token));
     },
   });
 
@@ -112,7 +109,7 @@ export default function SignUp() {
 
   return (
     <div className="flex flex-col justify-center w-80 gap-y-2 mx-auto mt-20">
-      <h1 className="font-medium text-2xl mb-2">Create Account</h1>
+      <h1 className="geist-600 text-2xl mb-2 text-center">Create Account</h1>
       <form className="flex flex-col gap-y-2">
         <Label>Name</Label>
         <div className="gap-x-2 flex">

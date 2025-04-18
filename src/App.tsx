@@ -1,9 +1,13 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { lazy, Suspense } from "react";
+
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import VerifyEmail from "./pages/VerifyEmail";
+// import VerifyEmail from "./pages/VerifyEmail";
 import Test from "./pages/Test";
+
+const Login = lazy(() => import("./pages/Login"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 const router = createBrowserRouter([
   {
@@ -12,15 +16,27 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Login />
+      </Suspense>
+    ),
   },
   {
     path: "/signup",
-    element: <SignUp />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <SignUp />
+      </Suspense>
+    ),
   },
   {
     path: "/verify_email",
-    element: <VerifyEmail />,
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <VerifyEmail />
+      </Suspense>
+    ),
   },
   {
     path: "/test",

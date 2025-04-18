@@ -2,25 +2,30 @@ import { useAppSelector } from "@/store/hooks";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchUser, selectStatus } from "@/store/userSlice";
 import { useEffect, useState } from "react";
+import type { ReactElement } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlignJustify, Cloud } from "lucide-react";
 import { SidebarNav } from "@/components/SidebarNav";
 import { HomeHeader } from "@/components/HomeHeader";
+import { ActiveTab } from "@/components/ActiveTab";
 
 export default function Home() {
   const dispatch = useAppDispatch();
   const status = useAppSelector(selectStatus);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("My Files");
+  const [activeTab, setActiveTab] = useState<{
+    name: string;
+    icon: ReactElement;
+  }>();
   const [sideNavbarVisible, setSideNavbarVisible] = useState(false);
-
+  // console.log(activeTab);
   useEffect(() => {
     if (status === "failed") navigate("/login");
     if (status === "idle") dispatch(fetchUser());
   }, [status]);
 
   return (
-    <div className="min-w-screen min-h-screen flex sm:flex-row flex-col">
+    <div className="flex sm:flex-row flex-col">
       {status === "pending" && <div>Loading...</div>}
       {status === "success" && (
         <>
@@ -42,8 +47,10 @@ export default function Home() {
             <h1 className="text-xl font-bold">PersonalDrive</h1>
             <Cloud />
           </div>
-
-          <HomeHeader />
+          <div className="w-full">
+            <HomeHeader />
+            {activeTab && <ActiveTab tab={activeTab} />}
+          </div>
         </>
       )}
     </div>

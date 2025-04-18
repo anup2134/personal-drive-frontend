@@ -9,7 +9,7 @@ import {
   CircleX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ReactElement, useEffect } from "react";
+import type { ReactElement } from "react";
 import { selectLimit } from "@/store/userSlice";
 import { useAppSelector } from "@/store/hooks";
 
@@ -19,8 +19,8 @@ export const SidebarNav = ({
   setSideNavbarVisible,
   sideNavbarVisible,
 }: {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab?: { name: string; icon: ReactElement };
+  setActiveTab: (tab: { name: string; icon: ReactElement }) => void;
   setSideNavbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
   sideNavbarVisible: boolean;
 }) => {
@@ -33,15 +33,11 @@ export const SidebarNav = ({
   ];
   const storageUsed = useAppSelector(selectLimit);
 
-  useEffect(() => {
-    console.log("rerendered");
-  }, []);
-
   return (
     <aside
-      className="w-[255px] flex flex-col border-r border-r-gray-200 gap-y-5 pt-4 px-3 h-screen sm:static absolute bg-white"
+      className="w-[300px] flex flex-col border-r bg-[#FAFAFA] border-r-gray-200 gap-y-5 pt-4 px-3 h-screen sm:static absolute"
       style={{
-        left: sideNavbarVisible ? 0 : -255,
+        left: sideNavbarVisible ? 0 : -300,
         transition: "left 0.3s ease",
       }}
     >
@@ -67,10 +63,10 @@ export const SidebarNav = ({
             <button
               key={tab.name}
               className={`flex items-center hover:cursor-pointer py-2 pl-2 rounded-md ${
-                activeTab === tab.name ? "bg-gray-100 font-medium" : ""
+                activeTab?.name === tab.name ? "bg-[#efefef] font-medium" : ""
               }`}
               onClick={() => {
-                setActiveTab(tab.name);
+                setActiveTab(tab);
               }}
             >
               {tab.icon}
@@ -82,14 +78,14 @@ export const SidebarNav = ({
       <footer className="mt-auto py-4">
         <div className="space-y-1">
           <p className="text-sm font-medium">Storage</p>
-          <div className="h-2 w-full rounded-full bg-gray-200">
+          <div className="h-2 w-full rounded-full bg-[#efefef]">
             <div
               className="h-2 rounded-full bg-primary"
               style={{ width: `${(storageUsed / 200) * 100}%` }}
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            {storageUsed} MB of 200 MB used
+            {storageUsed.toPrecision(2)} MB of 200 MB used
           </p>
         </div>
       </footer>

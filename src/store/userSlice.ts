@@ -1,7 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createAppAsyncThunk } from "./hooks";
 import type { UserState } from "@/types";
-import { fetchUser as getUser, login, logout } from "@/apis/userApis";
+import {
+  fetchUser as getUser,
+  login,
+  logout,
+  googleSignin,
+} from "@/apis/userApis";
 import { RootState } from "./store";
 
 const initialState: UserState = {
@@ -29,13 +34,20 @@ export const logoutUser = createAppAsyncThunk("user/logout", async () => {
   return await logout();
 });
 
+export const signupGoogleUser = createAppAsyncThunk(
+  "user/signin",
+  async (access_token: string) => {
+    return await googleSignin(access_token);
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    userLogout: (state) => {
-      state.status = "idle";
-    },
+    // userLogout: (state) => {
+    //   state.status = "idle";
+    // },
   },
   extraReducers(builder) {
     builder
@@ -73,6 +85,17 @@ export const userSlice = createSlice({
           return;
         }
         Object.assign(state, initialState);
+      })
+      .addCase(signupGoogleUser.fulfilled, (state, action) => {
+        if (!action.payload[0]) {
+          Object.assign(state, { ...initialState, status: action.payload[1] });
+          return;
+        }
+        Object.assign(state, {
+          ...action.payload[0],
+          status: "success",
+        });
+        // console.log(state);
       });
   },
 });
@@ -85,6 +108,6 @@ export const selectId = (state: RootState) => state.userReducer.id;
 export const selectPicture = (state: RootState) => state.userReducer.picture;
 export const selectLimit = (state: RootState) => state.userReducer.limit;
 
-export const { userLogout } = userSlice.actions;
+// export const { userLogout } = userSlice.actions;
 
 export default userSlice.reducer;

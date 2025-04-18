@@ -72,6 +72,28 @@ export const fetchUser = async () => {
   }
 };
 
+export const googleSignin = async (
+  access_token: string
+): Promise<[User, ""] | [null, "Something went wrong."]> => {
+  try {
+    const { data } = await axios.post(
+      "http://127.0.0.1:8000/api/v1/user/google/auth/",
+      { access_token: access_token },
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return [data.user as User, ""];
+  } catch (err) {
+    // toast("Something went wrong");
+    console.log(err);
+    return [null, "Something went wrong."];
+  }
+};
+
 export const logout = async () => {
   try {
     await axios.post(`${base}logout/`, {}, { withCredentials: true });
