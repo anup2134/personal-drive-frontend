@@ -44,11 +44,7 @@ export const signupGoogleUser = createAppAsyncThunk(
 export const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {
-    // userLogout: (state) => {
-    //   state.status = "idle";
-    // },
-  },
+  reducers: {},
   extraReducers(builder) {
     builder
       .addCase(fetchUser.pending, (state) => {

@@ -16,7 +16,7 @@ export const HomeHeader = () => {
   const dispatch = useAppDispatch();
 
   return (
-    <header className="py-4 flex h-max items-center justify-between w-full">
+    <header className="py-4 flex h-max items-center justify-between w-full ">
       <div className="flex items-center">
         <Search className="w-4 h-4 relative left-5" />
         <Input
@@ -38,7 +38,9 @@ export const HomeHeader = () => {
           <DropdownMenuContent>
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link to="/profile">Profile</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <button
                 onClick={() => {

@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import type { User } from "@/types";
-export const base = "http://127.0.0.1:8000/api/v1/user/";
+const base = "http://127.0.0.1:8000/api/v1/user/";
 
 export const createUser = async (
   email: string,

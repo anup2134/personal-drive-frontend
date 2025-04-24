@@ -1,15 +1,16 @@
 import {
   Cloud,
-  FolderOpen,
-  Image,
-  Share2,
-  Star,
+  // FolderOpen,
+  // Image,
+  // Share2,
+  // Star,
   Upload,
-  Users,
+  // Users,
+  type LucideProps,
   CircleX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ReactElement } from "react";
+// import type { ReactElement } from "react";
 import { selectLimit } from "@/store/userSlice";
 import { useAppSelector } from "@/store/hooks";
 
@@ -18,19 +19,29 @@ export const SidebarNav = ({
   setActiveTab,
   setSideNavbarVisible,
   sideNavbarVisible,
+  tabs,
 }: {
-  activeTab?: { name: string; icon: ReactElement };
-  setActiveTab: (tab: { name: string; icon: ReactElement }) => void;
+  activeTab: {
+    name: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  };
+  setActiveTab: (tab: {
+    name: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }) => void;
   setSideNavbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
   sideNavbarVisible: boolean;
+  tabs: {
+    name: string;
+    icon: React.ForwardRefExoticComponent<
+      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+    >;
+  }[];
 }) => {
-  const tabs: { name: string; icon: ReactElement }[] = [
-    { name: "My Files", icon: <FolderOpen className="mr-2 h-4 w-4" /> },
-    { name: "Shared with me", icon: <Share2 className="mr-2 h-4 w-4" /> },
-    { name: "Starred", icon: <Star className="mr-2 h-4 w-4" /> },
-    { name: "Photos", icon: <Image className="mr-2 h-4 w-4" /> },
-    { name: "Shared with others", icon: <Users className="mr-2 h-4 w-4" /> },
-  ];
   const storageUsed = useAppSelector(selectLimit);
 
   return (
@@ -59,6 +70,7 @@ export const SidebarNav = ({
       </Button>
       <nav className="flex flex-col gap-y-2">
         {tabs.map((tab) => {
+          const Tab = tab.icon;
           return (
             <button
               key={tab.name}
@@ -69,7 +81,7 @@ export const SidebarNav = ({
                 setActiveTab(tab);
               }}
             >
-              {tab.icon}
+              <Tab className="mr-2 h-4 w-4" />
               {tab.name}
             </button>
           );
