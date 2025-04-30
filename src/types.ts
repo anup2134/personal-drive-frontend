@@ -1,3 +1,4 @@
+import { type LucideProps } from "lucide-react";
 export interface User {
   f_name: string;
   l_name: string;
@@ -5,7 +6,12 @@ export interface User {
   id: number;
   email: string;
   limit: number;
+  root_folder_id: number;
 }
+
+export type icon = React.ForwardRefExoticComponent<
+  Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+>;
 
 export interface UserState extends User {
   status:
@@ -23,8 +29,14 @@ export interface File {
   size: number;
   type: string;
   created_at: string;
-  owner: number;
   is_shared: boolean;
+  url: string;
+}
+
+export interface SharedFile extends File {
+  owner_email: string;
+  owner_name: string;
+  owner_image: string;
 }
 
 export interface Folder {
@@ -34,9 +46,17 @@ export interface Folder {
   owner: number;
 }
 
-export interface storageState {
+export interface storage {
   status: "idle" | "pending" | "success" | "failed";
   error: string;
   files: File[];
   folders: Folder[];
+}
+export interface StorageTab {
+  name: string;
+  main: boolean;
+  id: number | null;
+}
+export interface storageState extends storage, StorageTab {
+  tabStack: StorageTab[];
 }

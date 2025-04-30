@@ -8,11 +8,21 @@ const Login = lazy(() => import("./pages/Login"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Profile = lazy(() => import("./pages/Profile"));
+const TermsOfService = lazy(() => import("./pages/TOSPage"));
+const NotFound = lazy(() => import("./pages/404"));
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/tos",
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <TermsOfService />
+      </Suspense>
+    ),
   },
   {
     path: "/login",
@@ -49,6 +59,14 @@ const router = createBrowserRouter([
   {
     path: "/test",
     element: <Test />,
+  },
+  {
+    path: "*",
+    element: (
+      <Suspense fallback={<div>Loading...</div>}>
+        <NotFound />
+      </Suspense>
+    ),
   },
 ]);
 

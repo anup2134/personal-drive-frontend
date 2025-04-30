@@ -1,48 +1,56 @@
-import {
-  Cloud,
-  // FolderOpen,
-  // Image,
-  // Share2,
-  // Star,
-  Upload,
-  // Users,
-  type LucideProps,
-  CircleX,
-} from "lucide-react";
+import { Cloud, Upload, CircleX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-// import type { ReactElement } from "react";
-import { selectLimit } from "@/store/userSlice";
-import { useAppSelector } from "@/store/hooks";
+import { selectLimit, selectRootFolderId } from "@/store/userSlice";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import {
+  folderData,
+  Images,
+  mainActiveTab,
+  sharedFiles,
+  selectActiveTab,
+} from "@/store/storageSlice";
+import { icon } from "@/types";
+import { useRef } from "react";
 
 export const SidebarNav = ({
   activeTab,
-  setActiveTab,
   setSideNavbarVisible,
   sideNavbarVisible,
   tabs,
 }: {
-  activeTab: {
-    name: string;
-    icon: React.ForwardRefExoticComponent<
-      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-    >;
-  };
-  setActiveTab: (tab: {
-    name: string;
-    icon: React.ForwardRefExoticComponent<
-      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-    >;
-  }) => void;
+  activeTab: string;
   setSideNavbarVisible: React.Dispatch<React.SetStateAction<boolean>>;
   sideNavbarVisible: boolean;
   tabs: {
     name: string;
-    icon: React.ForwardRefExoticComponent<
-      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-    >;
+    icon: icon;
   }[];
 }) => {
   const storageUsed = useAppSelector(selectLimit);
+  const rootFolderId = useAppSelector(selectRootFolderId);
+  const dispatch = useAppDispatch();
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const activeTabInfo = useAppSelector(selectActiveTab);
+
+  const handleUploadClick = () => {
+    if (uploadRef.current) {
+      uploadRef.current.click();
+    }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append(
+        "folder_id",
+        activeTabInfo.main
+          ? rootFolderId.toString()
+          : activeTabInfo.id?.toString() ?? rootFolderId.toString()
+      );
+    }
+  };
 
   return (
     <aside
@@ -64,10 +72,19 @@ export const SidebarNav = ({
           <CircleX className="w-4 h-4 absolute right-0 -top-1" />
         </button>
       </header>
-      <Button className="h-11 mb-6">
+      <Button
+        className="h-11 mb-6 hover:cursor-pointer"
+        onClick={handleUploadClick}
+      >
         <Upload className="w-5 h-5" />
         Upload
       </Button>
+      <input
+        type="file"
+        className="hidden"
+        ref={uploadRef}
+        onChange={handleUpload}
+      />
       <nav className="flex flex-col gap-y-2">
         {tabs.map((tab) => {
           const Tab = tab.icon;
@@ -75,10 +92,24 @@ export const SidebarNav = ({
             <button
               key={tab.name}
               className={`flex items-center hover:cursor-pointer py-2 pl-2 rounded-md ${
-                activeTab?.name === tab.name ? "bg-[#efefef] font-medium" : ""
+                activeTab === tab.name ? "bg-[#efefef] font-medium" : ""
               }`}
               onClick={() => {
-                setActiveTab(tab);
+                dispatch(
+                  mainActiveTab({
+                    name: tab.name,
+                    id: tab.name === "My Files" ? rootFolderId : -1,
+                    main: true,
+                  })
+                );
+                if (tab.name === "Shared with me") {
+                  dispatch(sharedFiles());
+                } else if (tab.name === "My Files") {
+                  dispatch(folderData(rootFolderId));
+                } else if (tab.name === "Images") {
+                  dispatch(Images());
+                } else {
+                }
               }}
             >
               <Tab className="mr-2 h-4 w-4" />

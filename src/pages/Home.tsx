@@ -1,42 +1,24 @@
-import { useAppSelector } from "@/store/hooks";
-import { useAppDispatch } from "@/store/hooks";
-import { fetchUser, selectStatus } from "@/store/userSlice";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { SidebarNav } from "@/components/SidebarNav";
 import { HomeHeader } from "@/components/HomeHeader";
 import { ActiveTab } from "@/components/ActiveTab";
-import {
-  Cloud,
-  FolderOpen,
-  Image,
-  Share2,
-  Users,
-  AlignJustify,
-  type LucideProps,
-} from "lucide-react";
+
+import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchUser, selectStatus } from "@/store/userSlice";
+import { selectActiveTab } from "@/store/storageSlice";
+import { tabs } from "@/utils";
+
+import { Cloud, AlignJustify } from "lucide-react";
 
 export default function Home() {
   const dispatch = useAppDispatch();
   const status = useAppSelector(selectStatus);
   const navigate = useNavigate();
-  const tabs: {
-    name: string;
-    icon: React.ForwardRefExoticComponent<
-      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-    >;
-  }[] = [
-    { name: "My Files", icon: FolderOpen },
-    { name: "Shared with me", icon: Share2 },
-    { name: "Photos", icon: Image },
-    { name: "Groups", icon: Users },
-  ];
-  const [activeTab, setActiveTab] = useState<{
-    name: string;
-    icon: React.ForwardRefExoticComponent<
-      Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-    >;
-  }>(tabs[0]);
+
+  const activeTab = useAppSelector(selectActiveTab);
   const [sideNavbarVisible, setSideNavbarVisible] = useState(false);
 
   useEffect(() => {
@@ -51,8 +33,7 @@ export default function Home() {
         <>
           <SidebarNav
             tabs={tabs}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            activeTab={activeTab.name}
             sideNavbarVisible={sideNavbarVisible}
             setSideNavbarVisible={setSideNavbarVisible}
           />
@@ -70,7 +51,7 @@ export default function Home() {
           </div>
           <div className="w-full max-h-screen overflow-hidden">
             <HomeHeader />
-            <ActiveTab tab={activeTab} type="main" />
+            <ActiveTab tab={activeTab.name} main={activeTab.main} />
           </div>
         </>
       )}
