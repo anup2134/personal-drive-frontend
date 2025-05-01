@@ -12,6 +12,7 @@ import {
   Download,
   Share2,
   Info,
+  Trash2,
 } from "lucide-react";
 import { useAppDispatch } from "@/store/hooks";
 import { folderData, mainActiveTab } from "@/store/storageSlice";
@@ -20,7 +21,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+  DropdownMenuSub,
 } from "@/components/ui/dropdown-menu";
+import {
+  DeleteFileDialogBox,
+  PublicLinkDialogBox,
+  ShareFileDialogBox,
+} from "./DialogBoxes";
+import { useState } from "react";
 
 function getFileIcon(extension: string) {
   switch (extension) {
@@ -77,21 +88,35 @@ export default function FileItem({
   size,
   isFolder = false,
   id,
+  url,
 }: {
   name: string;
-  size?: string;
+  size?: number;
   isFolder?: boolean;
   id: number;
+  url?: string;
 }) {
   const extension = name.split(".").pop()?.toLowerCase() || "";
   const FileIcon = getFileIcon(extension);
   const dispatch = useAppDispatch();
+  function downloadFile() {
+    if (!url) return;
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+  const [showDelete, setShowDelete] = useState(false);
+  const [showPublic, setShowPublic] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   return (
     <div
       className={`h-48 ${
         !isFolder ? "border border-gray-300" : "hover:bg-gray-100"
-      } rounded-md flex flex-col w-[45%] xsm:w-[30%] lg:w-[20%] max-w-40 hover:cursor-pointer`}
+      } rounded-md flex flex-col w-[45%] xsm:w-[30%] lg:w-[20%] max-w-40 min-w-36 hover:cursor-pointer`}
       onClick={() => {
         if (isFolder) {
           dispatch(mainActiveTab({ name, main: false, id }));
@@ -117,8 +142,9 @@ export default function FileItem({
           </div>
           <div className="flex items-center">
             <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap geist-500 text-gray-500 text-xs">
-              {size} MB
+              {size?.toPrecision(2)} MB
             </p>
+
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <EllipsisVertical
@@ -127,17 +153,47 @@ export default function FileItem({
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={downloadFile}>
                   <Download />
                   Download
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share2 />
-                  Share
-                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <div className="flex gap-x-2 items-center">
+                      <Share2 size={14} />
+                      Share
+                    </div>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setShowPublic(true);
+                        }}
+                      >
+                        Public link (anyone with link)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setShowShare(true);
+                        }}
+                      >
+                        Sharing Options
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
                 <DropdownMenuItem>
                   <Info />
                   File Information
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setShowDelete(true);
+                  }}
+                >
+                  <Trash2 />
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -146,6 +202,21 @@ export default function FileItem({
       ) : (
         <div className="px-2 py-1 text-center">{name}</div>
       )}
+      <DeleteFileDialogBox
+        showBox={showDelete}
+        setShowBox={setShowDelete}
+        id={id}
+      />
+      <PublicLinkDialogBox
+        showBox={showPublic}
+        setShowBox={setShowPublic}
+        id={id}
+      />
+      <ShareFileDialogBox
+        showBox={showShare}
+        setShowBox={setShowShare}
+        id={id}
+      />
     </div>
   );
 }

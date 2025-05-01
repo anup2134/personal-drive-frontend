@@ -1,7 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { createAppAsyncThunk } from "./hooks";
 import { File, Folder, storageState, SharedFile, StorageTab } from "@/types";
-import { getFolderData, getPhotos, getSharedFiles } from "@/apis/strorageApis";
+import {
+  getFolderData,
+  getPhotos,
+  getSharedFiles,
+  deleteFile,
+  shareFile,
+} from "@/apis/strorageApis";
 import { RootState } from "./store";
 import { createSelector } from "@reduxjs/toolkit";
 import { uploadFile } from "@/apis/strorageApis";
@@ -29,13 +35,35 @@ export const fileUpload = createAppAsyncThunk(
     return await uploadFile(formData);
   }
 );
+export const fileDelete = createAppAsyncThunk(
+  "storage/deleteFile",
+  async (file_id: number) => {
+    return await deleteFile(file_id);
+  }
+);
+
+export const fileShare = createAppAsyncThunk(
+  "storage/shareFile",
+  async ({
+    file_id,
+    anyone,
+    email,
+  }: {
+    file_id: number;
+    anyone: boolean;
+    email: string;
+  }) => {
+    return await shareFile(file_id, anyone, email);
+  }
+);
 
 const initialState: storageState = {
   name: "My Files",
+  toast: "",
   main: true,
   error: "",
   status: "idle",
-  id: null,
+  id: -1,
   files: [] as File[] | SharedFile[],
   folders: [] as Folder[],
   tabStack: [
@@ -61,15 +89,22 @@ export const storageSlice = createSlice({
       state.id = action.payload.id;
       if (action.payload.main) {
         state.tabStack = [action.payload];
-      } else {
-        state.tabStack.push(action.payload);
-      }
+      } else if (state.tabStack.find((tab) => tab.id === action.payload.id)) {
+        for (let i = 0; i < state.tabStack.length; i++) {
+          if (state.tabStack[i].id === action.payload.id) {
+            state.tabStack.splice(i + 1);
+            break;
+          }
+        }
+      } else state.tabStack.push(action.payload);
     },
   },
   extraReducers(builder) {
     builder
       .addCase(folderData.pending, (state) => {
         state.status = "pending";
+        state.toast = "";
+        state.error = "";
       })
       .addCase(folderData.fulfilled, (state, action) => {
         if (!action.payload) {
@@ -85,17 +120,21 @@ export const storageSlice = createSlice({
           files: action.payload.files,
           folders: action.payload.sub_folders,
           status: "success",
+          error: "",
+          toast: "",
         });
       })
       .addCase(folderData.rejected, (state, action) => {
         Object.assign(state, {
           ...initialState,
           status: "failed",
-          error: action.error.message,
+          error: action.error.message ?? "Something went wrong.",
         });
       })
       .addCase(sharedFiles.pending, (state) => {
         state.status = "pending";
+        state.toast = "";
+        state.error = "";
       })
       .addCase(sharedFiles.fulfilled, (state, action) => {
         if (!action.payload) {
@@ -111,17 +150,21 @@ export const storageSlice = createSlice({
           files: action.payload,
           folders: [],
           status: "success",
+          error: "",
+          toast: "",
         });
       })
       .addCase(sharedFiles.rejected, (state, action) => {
         Object.assign(state, {
           ...initialState,
           status: "failed",
-          error: action.error.message,
+          error: action.error.message ?? "Something went wrong.",
         });
       })
       .addCase(Images.pending, (state) => {
         state.status = "pending";
+        state.toast = "";
+        state.error = "";
       })
       .addCase(Images.fulfilled, (state, action) => {
         if (!action.payload) {
@@ -137,17 +180,55 @@ export const storageSlice = createSlice({
           files: action.payload,
           folders: [],
           status: "success",
+          error: "",
+          toast: "",
         });
       })
       .addCase(Images.rejected, (state, action) => {
         Object.assign(state, {
           ...initialState,
           status: "failed",
-          error: action.error.message,
+          error: action.error.message ?? "Something went wrong.",
         });
       })
       .addCase(fileUpload.rejected, (state, action) => {
-        state.error = action.error.message ?? "something went wrong";
+        state.error = action.error.message ?? "Something went wrong.";
+        state.toast = "";
+      })
+      .addCase(fileUpload.pending, (state) => {
+        state.toast = "uploading";
+        state.error = "";
+      })
+      .addCase(fileUpload.fulfilled, (state, action) => {
+        if (!action.payload) {
+          state.error = "something went wrong";
+        }
+        state.status = "success";
+        state.toast = "File uploaded successfully.";
+        state.error = "";
+        state.files = [...state.files, action.payload];
+      })
+      .addCase(fileDelete.pending, (state) => {
+        state.toast = "deleting";
+        state.error = "";
+      })
+      .addCase(fileDelete.fulfilled, (state, action) => {
+        state.status = "success";
+        state.toast = action.payload;
+        state.error = "";
+        state.files = state.files.filter((file) => file.id !== action.meta.arg);
+      })
+      .addCase(fileShare.pending, (state) => {
+        state.toast = "Processing...";
+      })
+      .addCase(fileShare.fulfilled, (state, action) => {
+        state.status = "success";
+        state.toast = action.payload;
+        state.error = "";
+      })
+      .addCase(fileShare.rejected, (state, action) => {
+        state.error = action.error.message ?? "Something went wrong.";
+        state.toast = "";
       });
   },
 });
@@ -158,6 +239,7 @@ export const selectFolders = (state: RootState) => state.storageReducer.folders;
 export const selectError = (state: RootState) => state.storageReducer.error;
 export const selectTabStack = (state: RootState) =>
   state.storageReducer.tabStack;
+export const selectToast = (state: RootState) => state.storageReducer.toast;
 
 const selectStorageReducer = (state: RootState) => state.storageReducer;
 export const selectActiveTab = createSelector(

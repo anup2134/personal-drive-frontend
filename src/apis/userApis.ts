@@ -88,7 +88,6 @@ export const googleSignin = async (
     );
     return [data.user as User, ""];
   } catch (err) {
-    // toast("Something went wrong");
     console.log(err);
     return [null, "Something went wrong."];
   }

@@ -47,15 +47,16 @@ export interface Folder {
 }
 
 export interface storage {
-  status: "idle" | "pending" | "success" | "failed";
+  status: string;
   error: string;
+  toast: string;
   files: File[];
   folders: Folder[];
 }
 export interface StorageTab {
   name: string;
   main: boolean;
-  id: number | null;
+  id: number;
 }
 export interface storageState extends storage, StorageTab {
   tabStack: StorageTab[];

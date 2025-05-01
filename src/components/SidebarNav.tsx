@@ -8,9 +8,11 @@ import {
   mainActiveTab,
   sharedFiles,
   selectActiveTab,
+  fileUpload,
 } from "@/store/storageSlice";
 import { icon } from "@/types";
 import { useRef } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 export const SidebarNav = ({
   activeTab,
@@ -49,6 +51,7 @@ export const SidebarNav = ({
           ? rootFolderId.toString()
           : activeTabInfo.id?.toString() ?? rootFolderId.toString()
       );
+      dispatch(fileUpload(formData));
     }
   };
 
@@ -132,6 +135,7 @@ export const SidebarNav = ({
           </p>
         </div>
       </footer>
+      <Toaster />
     </aside>
   );
 };

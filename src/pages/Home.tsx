@@ -8,10 +8,16 @@ import { ActiveTab } from "@/components/ActiveTab";
 import { useAppSelector } from "@/store/hooks";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchUser, selectStatus } from "@/store/userSlice";
-import { selectActiveTab } from "@/store/storageSlice";
+import {
+  selectActiveTab,
+  selectError,
+  selectToast,
+} from "@/store/storageSlice";
 import { tabs } from "@/utils";
 
 import { Cloud, AlignJustify } from "lucide-react";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -20,11 +26,15 @@ export default function Home() {
 
   const activeTab = useAppSelector(selectActiveTab);
   const [sideNavbarVisible, setSideNavbarVisible] = useState(false);
+  const error = useAppSelector(selectError);
+  const toastMessage = useAppSelector(selectToast);
 
   useEffect(() => {
     if (status === "failed") navigate("/login");
     if (status === "idle") dispatch(fetchUser());
-  }, [status]);
+    if (error != "") toast(error);
+    if (toastMessage !== "") toast(toastMessage);
+  }, [status, error, toastMessage]);
 
   return (
     <div className="flex sm:flex-row flex-col w-screen h-screen">
@@ -53,6 +63,7 @@ export default function Home() {
             <HomeHeader />
             <ActiveTab tab={activeTab.name} main={activeTab.main} />
           </div>
+          <Toaster />
         </>
       )}
     </div>

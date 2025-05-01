@@ -1,16 +1,16 @@
 import { Toaster } from "@/components/ui/sonner";
 import { tabs } from "@/utils";
-import { toast } from "sonner";
 import FileItem from "./FileItem";
 import { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
   selectStatus,
-  selectError,
   selectFiles,
   selectFolders,
   folderData,
   mainActiveTab,
+  Images,
+  sharedFiles,
 } from "@/store/storageSlice";
 import { Folder, ChevronRight } from "lucide-react";
 import { selectRootFolderId } from "@/store/userSlice";
@@ -19,10 +19,8 @@ import { Fragment } from "react";
 
 export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
   const rootFolderId = useAppSelector(selectRootFolderId);
-  // const TabIcon = tabs.find((t) => t.name === tab)?.icon ?? Folder;
   const dispatch = useAppDispatch();
   const status = useAppSelector(selectStatus);
-  const error = useAppSelector(selectError);
   const files = useAppSelector(selectFiles);
   const folders = useAppSelector(selectFolders);
   const [selected, setSelected] = useState<string>("files");
@@ -31,10 +29,6 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
   useEffect(() => {
     setSelected("files");
   }, [tab, main]);
-
-  useEffect(() => {
-    if (error) toast(error);
-  }, [error]);
 
   useEffect(() => {
     dispatch(mainActiveTab({ name: tab, main, id: rootFolderId }));
@@ -50,7 +44,26 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
             : Folder;
           return (
             <Fragment key={`${tab.id}${tab.name}`}>
-              <button className="flex items-center gap-x-2 hover:bg-gray-200 hover:cursor-pointer p-2 rounded-md transition-colors duration-300">
+              <button
+                className="flex items-center gap-x-2 hover:bg-gray-200 hover:cursor-pointer p-2 rounded-md transition-colors duration-300"
+                onClick={() => {
+                  dispatch(
+                    mainActiveTab({
+                      name: tab.name,
+                      main: tab.main,
+                      id: tab.id ? tab.id : rootFolderId,
+                    })
+                  );
+                  if (tab.name === "Shared with me" && tab.main)
+                    dispatch(sharedFiles());
+                  else if (tab.name === "My Files" && tab.main)
+                    dispatch(folderData(rootFolderId));
+                  else if (tab.name === "Images" && tab.main)
+                    dispatch(Images());
+                  else if (tab.name === "Groups" && tab.main) {
+                  } else if (tab.id) dispatch(folderData(tab.id));
+                }}
+              >
                 <TabIcon size={20} />
                 <p className="whitespace-nowrap">{tab.name}</p>
               </button>
@@ -84,7 +97,7 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
         </div>
       )}
 
-      <main className="w-full h-full overflow-y-scroll mb-20 flex flex-wrap gap-4 hide-scrollbar">
+      <main className="w-full h-full overflow-y-scroll mb-20 flex flex-wrap gap-4 content-start hide-scrollbar">
         {status === "pending" && (
           <div className="w-full h-full flex items-center justify-center">
             <p className="text-lg font-semibold">Loading...</p>
@@ -99,7 +112,8 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     key={file.id}
                     id={file.id}
                     name={file.name}
-                    size="1.2"
+                    size={file.size}
+                    url={file.url}
                   />
                 ))
               ) : (
@@ -115,6 +129,7 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     id={folder.id}
                     name={folder.name}
                     isFolder
+                    // url={file.url}
                   />
                 ))
               ) : (

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -9,6 +9,7 @@ export default function VerifyEmail() {
   const [success, setSuccess] = useState(false);
   const [invalid, setInvalid] = useState(false);
   const token = searchParams.get("token");
+  const navigate = useNavigate();
 
   if (!token)
     return (
@@ -49,6 +50,12 @@ export default function VerifyEmail() {
       setLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => navigate("/"), 1000);
+    }
+  }, [success]);
 
   return (
     <div className="flex justify-center items-center w-screen h-screen gap-x-2">
