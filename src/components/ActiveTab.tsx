@@ -14,8 +14,11 @@ import {
 } from "@/store/storageSlice";
 import { Folder, ChevronRight } from "lucide-react";
 import { selectRootFolderId } from "@/store/userSlice";
-import { selectTabStack } from "@/store/storageSlice";
+import { selectTabStack, selectActiveTab } from "@/store/storageSlice";
 import { Fragment } from "react";
+import { Button } from "./ui/button";
+import { Plus } from "lucide-react";
+import { FolderNameDialogBox } from "./DialogBoxes";
 
 export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
   const rootFolderId = useAppSelector(selectRootFolderId);
@@ -23,8 +26,10 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
   const status = useAppSelector(selectStatus);
   const files = useAppSelector(selectFiles);
   const folders = useAppSelector(selectFolders);
-  const [selected, setSelected] = useState<string>("files");
+  const [selected, setSelected] = useState<"files" | "folders">("files");
   const tabStack = useAppSelector(selectTabStack);
+  const active = useAppSelector(selectActiveTab);
+  const [showBox, setShowBox] = useState(false);
 
   useEffect(() => {
     setSelected("files");
@@ -73,27 +78,40 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
         })}
       </header>
       {((main && tab === "My Files") || !main) && (
-        <div className="flex mb-4 gap-x-2 border border-gray-300 rounded-md p-1 w-fit">
-          <button
-            className={`${
-              selected === "files" ? "bg-gray-200" : ""
-            } px-2 py-0.5 rounded-md hover:cursor-pointer transition-colors duration-300`}
-            onClick={() => {
-              setSelected("files");
-            }}
-          >
-            Files
-          </button>
-          <button
-            className={`${
-              selected === "folders" ? "bg-gray-200" : ""
-            } px-2 py-0.5 rounded-md hover:cursor-pointer transition-colors duration-300`}
-            onClick={() => {
-              setSelected("folders");
-            }}
-          >
-            Folders
-          </button>
+        <div className="flex gap-x-2">
+          <div className="flex mb-4 gap-x-2 border border-gray-300 rounded-md p-1 w-fit">
+            <button
+              className={`${
+                selected === "files" ? "bg-gray-200" : ""
+              } px-2 py-0.5 rounded-md hover:cursor-pointer transition-colors duration-300`}
+              onClick={() => {
+                setSelected("files");
+              }}
+            >
+              Files
+            </button>
+            <button
+              className={`${
+                selected === "folders" ? "bg-gray-200" : ""
+              } px-2 py-0.5 rounded-md hover:cursor-pointer transition-colors duration-300`}
+              onClick={() => {
+                setSelected("folders");
+              }}
+            >
+              Folders
+            </button>
+          </div>
+          {selected === "folders" && (
+            <Button
+              className="hover:cursor-pointer"
+              onClick={() => {
+                setShowBox(true);
+              }}
+            >
+              <Plus />
+              Add folder
+            </Button>
+          )}
         </div>
       )}
 
@@ -114,6 +132,7 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     name={file.name}
                     size={file.size}
                     url={file.url}
+                    type={file.type}
                   />
                 ))
               ) : (
@@ -128,8 +147,7 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     key={folder.id}
                     id={folder.id}
                     name={folder.name}
-                    isFolder
-                    // url={file.url}
+                    type="Folder"
                   />
                 ))
               ) : (
@@ -141,6 +159,13 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
         )}
       </main>
       <Toaster />
+      <FolderNameDialogBox
+        showBox={showBox}
+        setShowBox={setShowBox}
+        id={active.id}
+      />
     </section>
   );
 };
+
+//https://personaldrivebucket-4acc8ad1-670b-4c50-ba9d-ab6a283ec23a.s3.amazonaws.com/uploads/33?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAXZEFHZRDCR47XJSM%2F20250502%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20250502T132105Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=2c1257ba8e578c7c34b8eeb2b45df7716f1f927758bb52ab1ec06e0a5e076337

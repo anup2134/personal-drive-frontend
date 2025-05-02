@@ -43,6 +43,7 @@ export const SidebarNav = ({
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("here1");
       const formData = new FormData();
       formData.append("file", file);
       formData.append(
@@ -51,6 +52,7 @@ export const SidebarNav = ({
           ? rootFolderId.toString()
           : activeTabInfo.id?.toString() ?? rootFolderId.toString()
       );
+      console.log("here2");
       dispatch(fileUpload(formData));
     }
   };

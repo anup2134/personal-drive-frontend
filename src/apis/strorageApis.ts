@@ -92,3 +92,40 @@ export const shareFile = async (
     else throw new Error("Something went wrong.");
   }
 };
+
+export const queryFile = async (file_id: number, query: string) => {
+  try {
+    const { data } = await axios.post(
+      `${base}api/v1/storage/file/query/`,
+      { file_id, query },
+      { withCredentials: true }
+    );
+    return data.response as string;
+  } catch (err: any) {
+    if (err?.response?.data?.message)
+      throw new Error(err.response.data.message as string);
+    throw new Error("Unable to answer at this moment.");
+  }
+};
+
+export const createFolder = async (
+  folder_name: string,
+  parent_folder_id: number
+) => {
+  try {
+    const { data } = await axios.post(
+      `${base}folder/create/`,
+      {
+        folder_name,
+        parent_folder_id,
+      },
+      { withCredentials: true }
+    );
+
+    return data.folder as Folder;
+  } catch (err: any) {
+    if (err?.response?.data?.error)
+      throw new Error(err.response.data.error as string);
+    else throw new Error("Something went wrong.");
+  }
+};

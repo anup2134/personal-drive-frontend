@@ -10,11 +10,16 @@ const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const Profile = lazy(() => import("./pages/Profile"));
 const TermsOfService = lazy(() => import("./pages/TOSPage"));
 const NotFound = lazy(() => import("./pages/404"));
+const QueryPage = lazy(() => import("./pages/QueryPage"));
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/view_file",
+    element: <QueryPage />,
   },
   {
     path: "/tos",

@@ -32,6 +32,7 @@ import {
   ShareFileDialogBox,
 } from "./DialogBoxes";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function getFileIcon(extension: string) {
   switch (extension) {
@@ -86,16 +87,17 @@ function getFileIcon(extension: string) {
 export default function FileItem({
   name,
   size,
-  isFolder = false,
   id,
   url,
+  type,
 }: {
   name: string;
   size?: number;
-  isFolder?: boolean;
   id: number;
   url?: string;
+  type: string;
 }) {
+  const navigate = useNavigate();
   const extension = name.split(".").pop()?.toLowerCase() || "";
   const FileIcon = getFileIcon(extension);
   const dispatch = useAppDispatch();
@@ -111,28 +113,50 @@ export default function FileItem({
   const [showDelete, setShowDelete] = useState(false);
   const [showPublic, setShowPublic] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [fullWidth, setFullWidth] = useState(false);
+  const TextTypes = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
 
   return (
     <div
       className={`h-48 ${
-        !isFolder ? "border border-gray-300" : "hover:bg-gray-100"
+        type !== "Folder" ? "border border-gray-300" : "hover:bg-gray-100"
       } rounded-md flex flex-col w-[45%] xsm:w-[30%] lg:w-[20%] max-w-40 min-w-36 hover:cursor-pointer`}
-      onClick={() => {
-        if (isFolder) {
+      onDoubleClick={() => {
+        if (type === "Folder") {
           dispatch(mainActiveTab({ name, main: false, id }));
           dispatch(folderData(id));
-        } else {
+        } else if (url && TextTypes.includes(type)) {
+          navigate("/view_file", { state: { name, url, type } });
         }
       }}
     >
-      <div className={`h-full w-full ${!isFolder ? "p-2" : ""}`}>
-        {!isFolder ? (
-          <div className="bg-gray-200 w-full h-full rounded-md"></div>
+      <div className={`h-36 w-full ${type !== "Folder" ? "p-2" : ""}`}>
+        {type !== "Folder" ? (
+          <div className="bg-gray-200 w-full h-full rounded-md flex justify-center items-center p-1">
+            {type?.startsWith("image") ? (
+              <img
+                src={url}
+                alt="img"
+                className={`${fullWidth ? "w-full" : "h-full"}`}
+                onLoad={(e: any) => {
+                  const { naturalWidth, naturalHeight } = e.target;
+                  if (naturalWidth > naturalHeight) setFullWidth(true);
+                  else setFullWidth(false);
+                }}
+              />
+            ) : (
+              <FileIcon size={40} />
+            )}
+          </div>
         ) : (
           <Folder className="w-full h-full" />
         )}
       </div>
-      {!isFolder ? (
+      {type !== "Folder" ? (
         <div className="border-t border-gray-200 px-2 py-1">
           <div className="flex items-center gap-x-1">
             <FileIcon className="w-4 h-4" />
@@ -152,7 +176,11 @@ export default function FileItem({
                   className="rounded-full hover:bg-gray-200"
                 />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <DropdownMenuItem onClick={downloadFile}>
                   <Download />
                   Download
@@ -167,7 +195,8 @@ export default function FileItem({
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent>
                       <DropdownMenuItem
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setShowPublic(true);
                         }}
                       >

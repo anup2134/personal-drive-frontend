@@ -7,6 +7,7 @@ import {
   getSharedFiles,
   deleteFile,
   shareFile,
+  createFolder,
 } from "@/apis/strorageApis";
 import { RootState } from "./store";
 import { createSelector } from "@reduxjs/toolkit";
@@ -16,6 +17,18 @@ export const folderData = createAppAsyncThunk(
   "storage/folderData",
   async (id: string | number) => {
     return await getFolderData(id);
+  }
+);
+export const folderCreate = createAppAsyncThunk(
+  "storage/createFolder",
+  async ({
+    folder_name,
+    parent_folder_id,
+  }: {
+    folder_name: string;
+    parent_folder_id: number;
+  }) => {
+    return await createFolder(folder_name, parent_folder_id);
   }
 );
 
@@ -220,6 +233,7 @@ export const storageSlice = createSlice({
       })
       .addCase(fileShare.pending, (state) => {
         state.toast = "Processing...";
+        state.error = "";
       })
       .addCase(fileShare.fulfilled, (state, action) => {
         state.status = "success";
@@ -227,6 +241,20 @@ export const storageSlice = createSlice({
         state.error = "";
       })
       .addCase(fileShare.rejected, (state, action) => {
+        state.error = action.error.message ?? "Something went wrong.";
+        state.toast = "";
+      })
+      .addCase(folderCreate.pending, (state) => {
+        state.toast = "creating folder...";
+        state.error = "";
+      })
+      .addCase(folderCreate.fulfilled, (state, action) => {
+        state.status = "success";
+        state.toast = "Folder created successfully.";
+        state.folders = [...state.folders, action.payload];
+        state.error = "";
+      })
+      .addCase(folderCreate.rejected, (state, action) => {
         state.error = action.error.message ?? "Something went wrong.";
         state.toast = "";
       });

@@ -32,7 +32,7 @@ export default function Home() {
   useEffect(() => {
     if (status === "failed") navigate("/login");
     if (status === "idle") dispatch(fetchUser());
-    if (error != "") toast(error);
+    if (error !== "") toast(error);
     if (toastMessage !== "") toast(toastMessage);
   }, [status, error, toastMessage]);
 
