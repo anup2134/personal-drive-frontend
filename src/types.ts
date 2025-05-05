@@ -60,4 +60,17 @@ export interface StorageTab {
 }
 export interface storageState extends storage, StorageTab {
   tabStack: StorageTab[];
+  cache: {
+    [key: number | string]: {
+      files: File[];
+      sub_folders: Folder[];
+      requestTime: number;
+    };
+  };
+  sharedFileCache:
+    | {
+        files: SharedFile[];
+        requestTime: number;
+      }
+    | undefined;
 }

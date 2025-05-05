@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: "/view_file",
+    path: "/query_file",
     element: <QueryPage />,
   },
   {

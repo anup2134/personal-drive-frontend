@@ -131,7 +131,8 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     id={file.id}
                     name={file.name}
                     size={file.size}
-                    url={file.url}
+                    // url={file.url}
+                    url="/Untitled.png"
                     type={file.type}
                   />
                 ))
@@ -148,6 +149,7 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
                     id={folder.id}
                     name={folder.name}
                     type="Folder"
+                    url=""
                   />
                 ))
               ) : (

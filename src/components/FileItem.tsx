@@ -31,8 +31,9 @@ import {
   PublicLinkDialogBox,
   ShareFileDialogBox,
 } from "./DialogBoxes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ShowImg from "./ShowImg";
 
 function getFileIcon(extension: string) {
   switch (extension) {
@@ -94,7 +95,7 @@ export default function FileItem({
   name: string;
   size?: number;
   id: number;
-  url?: string;
+  url: string;
   type: string;
 }) {
   const navigate = useNavigate();
@@ -119,21 +120,44 @@ export default function FileItem({
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
   ];
+  const [showFile, setShowFile] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    setIsTouch(touch);
+  }, []);
 
   return (
     <div
       className={`h-48 ${
         type !== "Folder" ? "border border-gray-300" : "hover:bg-gray-100"
-      } rounded-md flex flex-col w-[45%] xsm:w-[30%] lg:w-[20%] max-w-40 min-w-36 hover:cursor-pointer`}
+      } rounded-md flex flex-col w-[45%] xsm:w-[30%] lg:w-[20%] max-w-40 min-w-36 hover:cursor-pointer select-none`}
       onDoubleClick={() => {
+        if (isTouch) return;
         if (type === "Folder") {
           dispatch(mainActiveTab({ name, main: false, id }));
           dispatch(folderData(id));
         } else if (url && TextTypes.includes(type)) {
-          navigate("/view_file", { state: { name, url, type } });
+          navigate("/query_file", { state: { name, url, id } });
+        } else if (url && type.startsWith("image")) {
+          setShowFile(true);
+        }
+      }}
+      onClick={() => {
+        if (!isTouch) return;
+
+        if (type === "Folder") {
+          dispatch(mainActiveTab({ name, main: false, id }));
+          dispatch(folderData(id));
+        } else if (url && TextTypes.includes(type)) {
+          navigate("/query_file", { state: { name, url, id } });
+        } else if (url && type.startsWith("image")) {
+          setShowFile(true);
         }
       }}
     >
+      {showFile && <ShowImg setShowFile={setShowFile} url={url} />}
       <div className={`h-36 w-full ${type !== "Folder" ? "p-2" : ""}`}>
         {type !== "Folder" ? (
           <div className="bg-gray-200 w-full h-full rounded-md flex justify-center items-center p-1">

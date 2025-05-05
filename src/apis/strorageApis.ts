@@ -3,7 +3,7 @@ import { File, Folder, SharedFile } from "@/types";
 
 const base = "http://127.0.0.1:8000/api/v1/storage/";
 
-export const getFolderData = async (folder_id: number | string) => {
+export const getFolderData = async function (folder_id: number) {
   try {
     const { data } = await axios.get(
       `${base}folder_content/?folder_id=${folder_id}`,
@@ -11,6 +11,7 @@ export const getFolderData = async (folder_id: number | string) => {
         withCredentials: true,
       }
     );
+
     return data as {
       files: File[];
       sub_folders: Folder[];

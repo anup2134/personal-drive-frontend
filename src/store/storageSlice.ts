@@ -13,44 +13,95 @@ import { RootState } from "./store";
 import { createSelector } from "@reduxjs/toolkit";
 import { uploadFile } from "@/apis/strorageApis";
 
-export const folderData = createAppAsyncThunk(
-  "storage/folderData",
-  async (id: string | number) => {
-    return await getFolderData(id);
-  }
-);
+export const folderData = createAppAsyncThunk<
+  { files: File[]; sub_folders: Folder[] },
+  number,
+  { state: RootState }
+>("storage/folderData", async (id: number, thunkAPI) => {
+  const { storageReducer } = thunkAPI.getState();
+  if (
+    storageReducer.cache[id] &&
+    Date.now() - storageReducer.cache[id].requestTime < 119 * 60 * 1000
+  )
+    return storageReducer.cache[id] as {
+      files: File[];
+      sub_folders: Folder[];
+    };
+
+  const data = await getFolderData(id);
+  thunkAPI.dispatch(cacheFolder({ ...data, folder_id: id }));
+  return data;
+});
+
 export const folderCreate = createAppAsyncThunk(
   "storage/createFolder",
-  async ({
-    folder_name,
-    parent_folder_id,
-  }: {
-    folder_name: string;
-    parent_folder_id: number;
-  }) => {
+  async (
+    {
+      folder_name,
+      parent_folder_id,
+    }: {
+      folder_name: string;
+      parent_folder_id: number;
+    },
+    thunkAPI
+  ) => {
+    thunkAPI.dispatch(invalidateCache({ folder_id: parent_folder_id }));
     return await createFolder(folder_name, parent_folder_id);
   }
 );
 
 export const sharedFiles = createAppAsyncThunk(
   "storage/sharedFiles",
-  async () => {
-    return await getSharedFiles();
+  async (_, thunkAPI) => {
+    const { storageReducer } = thunkAPI.getState();
+    if (
+      storageReducer.sharedFileCache &&
+      Date.now() - storageReducer.sharedFileCache.requestTime < 5 * 60 * 1000
+    ) {
+      return storageReducer.sharedFileCache.files as SharedFile[];
+    }
+    const data = await getSharedFiles();
+    thunkAPI.dispatch(cacheSharedFiles({ shared_files: data }));
+    return data;
   }
 );
-export const Images = createAppAsyncThunk("storage/images", async () => {
-  return await getPhotos();
-});
+export const Images = createAppAsyncThunk(
+  "storage/images",
+  async (_, thunkAPI) => {
+    console.log("here");
+    const { storageReducer } = thunkAPI.getState();
+    if (
+      storageReducer.cache["Images"] &&
+      Date.now() - storageReducer.cache["Images"].requestTime < 119 * 60 * 1000
+    )
+      return storageReducer.cache["Images"] as {
+        files: File[];
+        sub_folders: Folder[];
+      };
+
+    const data = await getPhotos();
+    thunkAPI.dispatch(
+      cacheFolder({ files: data, sub_folders: [], folder_id: "Images" })
+    );
+    return data;
+  }
+);
 
 export const fileUpload = createAppAsyncThunk(
   "storage/uploadFile",
-  async (formData: FormData) => {
+  async (formData: FormData, thunkAPI) => {
+    const { storageReducer } = thunkAPI.getState();
+
+    thunkAPI.dispatch(invalidateCache({ folder_id: storageReducer.id }));
     return await uploadFile(formData);
   }
 );
 export const fileDelete = createAppAsyncThunk(
   "storage/deleteFile",
-  async (file_id: number) => {
+  async (file_id: number, thunkAPI) => {
+    const { storageReducer } = thunkAPI.getState();
+
+    thunkAPI.dispatch(invalidateCache({ folder_id: storageReducer.id }));
     return await deleteFile(file_id);
   }
 );
@@ -83,6 +134,8 @@ const initialState: storageState = {
     { name: "test1", id: 2, main: false },
     { name: "test2", id: 9, main: false },
   ] as StorageTab[],
+  cache: {},
+  sharedFileCache: undefined,
 };
 
 export const storageSlice = createSlice({
@@ -110,6 +163,33 @@ export const storageSlice = createSlice({
           }
         }
       } else state.tabStack.push(action.payload);
+    },
+    cacheFolder: (
+      state,
+      action: PayloadAction<{
+        folder_id: number | string;
+        files: File[];
+        sub_folders: Folder[];
+      }>
+    ) => {
+      state.cache[action.payload.folder_id] = {
+        files: action.payload.files,
+        sub_folders: action.payload.sub_folders,
+        requestTime: Date.now(),
+      };
+    },
+    invalidateCache: (state, action: PayloadAction<{ folder_id: number }>) => {
+      delete state.cache[action.payload.folder_id];
+      delete state.cache["Images"];
+    },
+    cacheSharedFiles: (
+      state,
+      action: PayloadAction<{ shared_files: SharedFile[] }>
+    ) => {
+      state.sharedFileCache = {
+        files: action.payload.shared_files,
+        requestTime: Date.now(),
+      };
     },
   },
   extraReducers(builder) {
@@ -278,6 +358,7 @@ export const selectActiveTab = createSelector(
     id: storage.id,
   })
 );
-
-export const { mainActiveTab } = storageSlice.actions;
+export const selectCache = (state: RootState) => state.storageReducer.cache;
+export const { mainActiveTab, cacheFolder, invalidateCache, cacheSharedFiles } =
+  storageSlice.actions;
 export default storageSlice.reducer;

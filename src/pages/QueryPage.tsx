@@ -63,7 +63,9 @@ export default function QueryPage() {
   async function handleQuery() {
     setAnswering(true);
     setChat([...chat, { question: question, answer: "" }]);
-    const ans = await queryFile(state.id, question).catch(() => {});
+    const ans = await queryFile(state.id, question).catch(() => {
+      return undefined;
+    });
     setQuestion("");
     setChat((prevChat) => {
       const obj = prevChat[prevChat.length - 1];
@@ -79,7 +81,7 @@ export default function QueryPage() {
   return (
     <main className="w-screen h-screen flex sm:flex-row flex-col">
       <iframe
-        src={state.url}
+        src={state ? state.url : ""}
         className="w-full md:w-1/2 lg:w-3/5 xl:w-3/4 h-full"
       />
       <section className="md:w-1/2 lg:w-2/5 xl:w-1/4 h-full px-2 flex-col w-full flex">
