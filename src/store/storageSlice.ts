@@ -68,16 +68,13 @@ export const sharedFiles = createAppAsyncThunk(
 export const Images = createAppAsyncThunk(
   "storage/images",
   async (_, thunkAPI) => {
-    console.log("here");
+    console.log("here1");
     const { storageReducer } = thunkAPI.getState();
     if (
       storageReducer.cache["Images"] &&
       Date.now() - storageReducer.cache["Images"].requestTime < 119 * 60 * 1000
     )
-      return storageReducer.cache["Images"] as {
-        files: File[];
-        sub_folders: Folder[];
-      };
+      return storageReducer.cache["Images"].files as File[];
 
     const data = await getPhotos();
     thunkAPI.dispatch(

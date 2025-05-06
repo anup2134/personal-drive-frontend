@@ -125,17 +125,19 @@ export const ActiveTab = ({ tab, main }: { tab: string; main: boolean }) => {
           <>
             {selected === "files" &&
               (files.length > 0 ? (
-                files.map((file) => (
-                  <FileItem
-                    key={file.id}
-                    id={file.id}
-                    name={file.name}
-                    size={file.size}
-                    // url={file.url}
-                    url="/Untitled.png"
-                    type={file.type}
-                  />
-                ))
+                files.map((file) => {
+                  return (
+                    <FileItem
+                      key={file.id}
+                      id={file.id}
+                      name={file.name}
+                      size={file.size}
+                      // url={file.url}
+                      url="/Untitled.png"
+                      type={file.type}
+                    />
+                  );
+                })
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <p className="text-lg font-semibold">No files found</p>

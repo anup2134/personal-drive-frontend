@@ -34,9 +34,11 @@ export interface File {
 }
 
 export interface SharedFile extends File {
-  owner_email: string;
-  owner_name: string;
-  owner_image: string;
+  owner_data: {
+    owner_email: string;
+    owner_name: string;
+    owner_image: string;
+  };
 }
 
 export interface Folder {

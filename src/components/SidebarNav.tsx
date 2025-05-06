@@ -112,6 +112,7 @@ export const SidebarNav = ({
                 } else if (tab.name === "My Files") {
                   dispatch(folderData(rootFolderId));
                 } else if (tab.name === "Images") {
+                  console.log("here");
                   dispatch(Images());
                 } else {
                 }
