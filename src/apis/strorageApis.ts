@@ -130,3 +130,17 @@ export const createFolder = async (
     else throw new Error("Something went wrong.");
   }
 };
+
+export const getSearchResults = async (name: string) => {
+  try {
+    const { data } = await axios.get(`${base}file/search/?name=${name}`, {
+      withCredentials: true,
+    });
+    return data as { files: File[]; folders: Folder[] };
+  } catch (err: any) {
+    console.log(err);
+    if (err?.response?.data?.error)
+      throw new Error(err.response.data.error as string);
+    else throw new Error("Something went wrong.");
+  }
+};

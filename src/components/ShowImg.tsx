@@ -1,8 +1,10 @@
 import { X } from "lucide-react";
 export default function ShowImg({
+  name,
   setShowFile,
   url,
 }: {
+  name: string;
   setShowFile: React.Dispatch<React.SetStateAction<boolean>>;
   url: string;
 }) {
@@ -18,7 +20,9 @@ export default function ShowImg({
             setShowFile(false);
           }}
         />
-        <h1 className="opacity-100 text-[#C4C7C5] text-xl">Untitled.png</h1>
+        <h1 className="opacity-100 text-[#C4C7C5] text-xl overflow-hidden">
+          {name}
+        </h1>
       </nav>
       <div className="p-4 flex justify-center items-center w-full h-full overflow-hidden">
         <img src={url} className="object-contain max-w-full max-h-full" />

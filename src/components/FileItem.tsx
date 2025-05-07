@@ -1,31 +1,8 @@
-import {
-  FileText,
-  FileImage,
-  FileIcon as FilePdf,
-  FileCode,
-  FileArchive,
-  FileAudio,
-  FileVideo,
-  File,
-  Folder,
-  EllipsisVertical,
-  Download,
-  Share2,
-  Info,
-  Trash2,
-} from "lucide-react";
+import { Folder } from "lucide-react";
 import { useAppDispatch } from "@/store/hooks";
 import { folderData, mainActiveTab } from "@/store/storageSlice";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-} from "@/components/ui/dropdown-menu";
+import FileDropDown from "./FileDropDown";
+
 import {
   DeleteFileDialogBox,
   PublicLinkDialogBox,
@@ -34,56 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ShowImg from "./ShowImg";
-
-function getFileIcon(extension: string) {
-  switch (extension) {
-    case "pdf":
-      return FilePdf;
-    case "jpg":
-    case "jpeg":
-    case "png":
-    case "gif":
-    case "webp":
-      return FileImage;
-    case "mp3":
-    case "wav":
-    case "ogg":
-      return FileAudio;
-    case "mp4":
-    case "mov":
-    case "avi":
-      return FileVideo;
-    case "zip":
-    case "rar":
-    case "7z":
-      return FileArchive;
-    case "js":
-    case "ts":
-    case "jsx":
-    case "tsx":
-    case "html":
-    case "css":
-    case "py":
-    case "cpp":
-    case "java":
-    case "c":
-    case "go":
-    case "php":
-    case "rb":
-    case "swift":
-    case "json":
-    case "xml":
-    case "yaml":
-    case "yml":
-      return FileCode;
-    case "txt":
-    case "doc":
-    case "docx":
-      return FileText;
-    default:
-      return File;
-  }
-}
+import { getFileIcon } from "@/utils";
 
 export default function FileItem({
   name,
@@ -157,7 +85,7 @@ export default function FileItem({
         }
       }}
     >
-      {showFile && <ShowImg setShowFile={setShowFile} url={url} />}
+      {showFile && <ShowImg setShowFile={setShowFile} url={url} name={name} />}
       <div className={`h-36 w-full ${type !== "Folder" ? "p-2" : ""}`}>
         {type !== "Folder" ? (
           <div className="bg-gray-200 w-full h-full rounded-md flex justify-center items-center p-1">
@@ -193,63 +121,12 @@ export default function FileItem({
               {size?.toPrecision(2)} MB
             </p>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <EllipsisVertical
-                  size={20}
-                  className="rounded-full hover:bg-gray-200"
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <DropdownMenuItem onClick={downloadFile}>
-                  <Download />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <div className="flex gap-x-2 items-center">
-                      <Share2 size={14} />
-                      Share
-                    </div>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowPublic(true);
-                        }}
-                      >
-                        Public link (anyone with link)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setShowShare(true);
-                        }}
-                      >
-                        Sharing Options
-                      </DropdownMenuItem>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-                <DropdownMenuItem>
-                  <Info />
-                  File Information
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setShowDelete(true);
-                  }}
-                >
-                  <Trash2 />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <FileDropDown
+              setShowDelete={setShowDelete}
+              setShowPublic={setShowPublic}
+              downloadFile={downloadFile}
+              setShowShare={setShowShare}
+            />
           </div>
         </div>
       ) : (
